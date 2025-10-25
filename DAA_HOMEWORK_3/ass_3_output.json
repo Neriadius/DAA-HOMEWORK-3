@@ -1,0 +1,22 @@
+{
+  "results": [
+    {
+      "graph_id": 1,
+      "input_stats": {"vertices": 5, "edges": 7},
+      "prim": {
+        "total_cost": 16,
+        "operations_count": 10,
+        "execution_time_ms": 0,75
+      }
+    },
+    {
+      "graph_id": 2,
+      "input_stats": {"vertices": 4, "edges": 5},
+      "prim": {
+        "total_cost": 6,
+        "operations_count": 6,
+        "execution_time_ms": 0,02
+      }
+    }
+  ]
+}
