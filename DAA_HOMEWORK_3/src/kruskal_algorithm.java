@@ -30,34 +30,30 @@ public class kruskal_algorithm {
         private final Map<String, String> parent = new HashMap<>();
 
         public void makeSet(Collection<String> vertices) {
-            for (String v : vertices) {
-                parent.put(v, v);
-            }
+            for (String v : vertices) parent.put(v, v);
         }
 
         public String find(String v) {
-            if (!parent.get(v).equals(v)) {
+            if (!parent.get(v).equals(v))
                 parent.put(v, find(parent.get(v))); // Path compression
-            }
             return parent.get(v);
         }
 
         public void union(String a, String b) {
             String rootA = find(a);
             String rootB = find(b);
-            if (!rootA.equals(rootB)) {
+            if (!rootA.equals(rootB))
                 parent.put(rootB, rootA);
-            }
         }
     }
 
-    // --- Kruskal algorithm ---
+    // --- Kruskal's Algorithm ---
     public static Map<String, Object> kruskalMST(List<String> nodes, List<Edge> edges) {
         long start = System.nanoTime();
         int operations = 0;
 
         Collections.sort(edges);
-        operations += edges.size();
+        operations += edges.size(); // for sorting
 
         DisjointSet ds = new DisjointSet();
         ds.makeSet(nodes);
@@ -75,6 +71,7 @@ public class kruskal_algorithm {
                 mst.add(edge);
                 totalCost += edge.weight;
                 ds.union(rootA, rootB);
+                operations++;
             }
 
             if (mst.size() == nodes.size() - 1) break;
@@ -88,6 +85,8 @@ public class kruskal_algorithm {
         result.put("total_cost", totalCost);
         result.put("operations_count", operations);
         result.put("execution_time_ms", execTimeMs);
+        result.put("vertices", nodes.size());
+        result.put("edges", edges.size());
 
         return result;
     }
@@ -114,9 +113,9 @@ public class kruskal_algorithm {
             String json = sb.toString();
             List<Map<String, Object>> graphs = extractGraphs(json);
 
-            // Prepare output content
+            // Prepare output
             StringBuilder output = new StringBuilder();
-            output.append("[\n");
+            output.append("{\n  \"results\": [\n");
 
             for (int i = 0; i < graphs.size(); i++) {
                 Map<String, Object> graph = graphs.get(i);
@@ -125,57 +124,54 @@ public class kruskal_algorithm {
                 List<Edge> edges = (List<Edge>) graph.get("edges");
 
                 Map<String, Object> mstResult = kruskalMST(nodes, edges);
-
-                // Print to console
-                System.out.println("\nGraph ID: " + id);
-                System.out.println("Total cost: " + mstResult.get("total_cost"));
-                System.out.println("Edges in MST:");
                 @SuppressWarnings("unchecked")
                 List<Edge> mstEdges = (List<Edge>) mstResult.get("mst_edges");
-                for (Edge e : mstEdges) {
-                    System.out.println("  " + e.from + " - " + e.to + " (" + e.weight + ")");
-                }
-                System.out.println("Operations: " + mstResult.get("operations_count"));
-                System.out.println("Time: " + mstResult.get("execution_time_ms") + " ms");
 
-                // Write to output JSON
-                output.append("  {\n");
-                output.append("    \"id\": ").append(id).append(",\n");
-                output.append("    \"total_cost\": ").append(mstResult.get("total_cost")).append(",\n");
-                output.append("    \"operations_count\": ").append(mstResult.get("operations_count")).append(",\n");
-                output.append("    \"execution_time_ms\": ").append(mstResult.get("execution_time_ms")).append(",\n");
-                output.append("    \"mst_edges\": [\n");
+                // --- Write JSON ---
+                output.append("    {\n");
+                output.append("      \"graph_id\": ").append(id).append(",\n");
+                output.append("      \"input_stats\": {\"vertices\": ").append(mstResult.get("vertices"))
+                        .append(", \"edges\": ").append(mstResult.get("edges")).append("},\n");
+                output.append("      \"kruskal\": {\n");
+                output.append("        \"edges_in_mst\": [\n");
+
                 for (int j = 0; j < mstEdges.size(); j++) {
-                    output.append("      ").append(mstEdges.get(j).toString());
+                    output.append("          ").append(mstEdges.get(j).toString());
                     if (j < mstEdges.size() - 1) output.append(",");
                     output.append("\n");
                 }
-                output.append("    ]\n");
-                output.append("  }");
+
+                output.append("        ],\n");
+                output.append("        \"total_cost\": ").append(mstResult.get("total_cost")).append(",\n");
+                output.append("        \"operations_count\": ").append(mstResult.get("operations_count")).append(",\n");
+                output.append("        \"execution_time_ms\": ")
+                        .append(String.format("%.2f", mstResult.get("execution_time_ms"))).append("\n");
+                output.append("      }\n    }");
+
                 if (i < graphs.size() - 1) output.append(",");
                 output.append("\n");
             }
 
-            output.append("]\n");
+            output.append("  ]\n}\n");
 
-            // Write result to file
+            // Write result to output file
             File outFile = new File("C:\\Users\\musee\\Documents\\github\\DAA-HOMEWORK-3\\DAA_HOMEWORK_3\\src\\ass_3_output.json");
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFile))) {
                 writer.write(output.toString());
             }
 
-            System.out.println("\nOutput written to: " + outFile.getAbsolutePath());
+            System.out.println("\nResults written to: " + outFile.getAbsolutePath());
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // --- Simplified JSON parsing ---
+    // --- Minimal JSON parser for input (manual parsing) ---
     private static List<Map<String, Object>> extractGraphs(String json) {
         List<Map<String, Object>> graphs = new ArrayList<>();
-
         String[] parts = json.split("\\{\\s*\"id\"\\s*:");
+
         for (int i = 1; i < parts.length; i++) {
             String chunk = parts[i];
             Map<String, Object> graph = new HashMap<>();
@@ -208,10 +204,8 @@ public class kruskal_algorithm {
                 }
             }
             graph.put("edges", edges);
-
             graphs.add(graph);
         }
-
         return graphs;
     }
 

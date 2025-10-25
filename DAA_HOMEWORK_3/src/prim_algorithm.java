@@ -39,6 +39,7 @@ public class prim_algorithm {
         }
     }
 
+    // === Prim's Algorithm ===
     public static MSTResult prim(Map<String, List<Edge>> graph, List<String> nodes) {
         MSTResult result = new MSTResult();
         Set<String> visited = new HashSet<>();
@@ -78,17 +79,12 @@ public class prim_algorithm {
 
     public static void main(String[] args) {
         try {
-            // === 1. Read JSON manually (simple parsing for fixed structure) ===
+            // === 1. (Optional) Read JSON ===
             StringBuilder jsonBuilder = new StringBuilder();
             BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\musee\\Documents\\github\\DAA-HOMEWORK-3\\DAA_HOMEWORK_3\\src\\ass_3_input.json"));
             String line;
             while ((line = br.readLine()) != null) jsonBuilder.append(line);
             br.close();
-
-            String json = jsonBuilder.toString();
-
-            // crude parsing without external libraries (for your constraint)
-            // parse small JSON manually — we assume structure is stable
 
             // === Graph 1 ===
             System.out.println("Processing Graph 1...");
@@ -111,7 +107,6 @@ public class prim_algorithm {
             }
 
             MSTResult r1 = prim(graph1, nodes1);
-            System.out.println("Graph 1 MST cost = " + r1.totalCost);
 
             // === Graph 2 ===
             System.out.println("Processing Graph 2...");
@@ -132,28 +127,47 @@ public class prim_algorithm {
             }
 
             MSTResult r2 = prim(graph2, nodes2);
-            System.out.println("Graph 2 MST cost = " + r2.totalCost);
 
-            // === 3. Write output JSON ===
+            // === 3. Write output JSON (with all required info) ===
             BufferedWriter bw = new BufferedWriter(new FileWriter("C:\\Users\\musee\\Documents\\github\\DAA-HOMEWORK-3\\DAA_HOMEWORK_3\\src\\ass_3_output.json"));
             bw.write("{\n  \"results\": [\n");
+
+            // --- Graph 1 Output ---
             bw.write("    {\n");
             bw.write("      \"graph_id\": 1,\n");
-            bw.write("      \"input_stats\": {\"vertices\": 5, \"edges\": 7},\n");
+            bw.write("      \"input_stats\": {\"vertices\": " + nodes1.size() + ", \"edges\": " + edges1.size() + "},\n");
             bw.write("      \"prim\": {\n");
+            bw.write("        \"edges_in_mst\": [\n");
+            for (int i = 0; i < r1.edges.size(); i++) {
+                Edge e = r1.edges.get(i);
+                bw.write("          {\"from\": \"" + e.from + "\", \"to\": \"" + e.to + "\", \"weight\": " + e.weight + "}");
+                if (i < r1.edges.size() - 1) bw.write(",");
+                bw.write("\n");
+            }
+            bw.write("        ],\n");
             bw.write("        \"total_cost\": " + r1.totalCost + ",\n");
             bw.write("        \"operations_count\": " + r1.operationsCount + ",\n");
             bw.write("        \"execution_time_ms\": " + String.format("%.2f", r1.execTimeMs) + "\n");
             bw.write("      }\n    },\n");
 
+            // --- Graph 2 Output ---
             bw.write("    {\n");
             bw.write("      \"graph_id\": 2,\n");
-            bw.write("      \"input_stats\": {\"vertices\": 4, \"edges\": 5},\n");
+            bw.write("      \"input_stats\": {\"vertices\": " + nodes2.size() + ", \"edges\": " + edges2.size() + "},\n");
             bw.write("      \"prim\": {\n");
+            bw.write("        \"edges_in_mst\": [\n");
+            for (int i = 0; i < r2.edges.size(); i++) {
+                Edge e = r2.edges.get(i);
+                bw.write("          {\"from\": \"" + e.from + "\", \"to\": \"" + e.to + "\", \"weight\": " + e.weight + "}");
+                if (i < r2.edges.size() - 1) bw.write(",");
+                bw.write("\n");
+            }
+            bw.write("        ],\n");
             bw.write("        \"total_cost\": " + r2.totalCost + ",\n");
             bw.write("        \"operations_count\": " + r2.operationsCount + ",\n");
             bw.write("        \"execution_time_ms\": " + String.format("%.2f", r2.execTimeMs) + "\n");
             bw.write("      }\n    }\n");
+
             bw.write("  ]\n}");
             bw.close();
 
